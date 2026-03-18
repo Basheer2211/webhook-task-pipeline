@@ -7,7 +7,9 @@ export class StorageInQueue {
 
     const job=await orderQueue.add("process-order", order)
     return {
-      status: "queued"
+      status: "queued",
+      jobId: job.id,    
+      orderId: order.id
     }
     
   }

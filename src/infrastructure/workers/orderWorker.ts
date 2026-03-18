@@ -1,7 +1,6 @@
 import { Worker } from "bullmq"
 import { processingOrder } from "../../application/use-cases/processingOrder"
 import { PrismaOrderRepository } from "../database/PrismaOrderRepository"
-
 import { accountingQueue } from "../queue/accountingQueue"
 import { kitchenQueue } from "../queue/kitchenQueue"
 import { deliveryQueue } from "../queue/deliveryQueue"
@@ -37,6 +36,7 @@ new Worker(
     connection: {
       host: "127.0.0.1",
       port: 6379
-    }
+    },
+    concurrency: 5
   }
 )

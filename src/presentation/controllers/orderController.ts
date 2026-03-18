@@ -3,6 +3,8 @@ import { StorageInQueue } from "../../application/use-cases/StorageInQueue"
 import {processingOrder} from "../../application/use-cases/processingOrder"
 import { PrismaOrderRepository } from "../../infrastructure/database/PrismaOrderRepository";
 import { authMiddleware } from "../middlewares/authMiddleware"
+import { verifyWebhookSignature } from "../../infrastructure/security/verifyWebhookSignature"
+
 import { adminMiddleware } from "../middlewares/adminMiddleware"
 const router = express.Router()
 
@@ -10,7 +12,26 @@ const storageInQueue = new StorageInQueue()
 const orderRepo = new PrismaOrderRepository();  
 const orderService = new processingOrder(orderRepo);
 
-router.post("/webhook/order",authMiddleware, async (req, res) => {
+router.post("/webhook/order", async (req, res) => {
+  const signature = req.headers["x-signature"] as string
+
+  if (!signature) {
+    return res.status(401).json({
+      message: "Missing signature"
+    })
+  }
+
+  const valid = verifyWebhookSignature(
+    JSON.stringify(req.body),
+    signature
+  )
+
+  if (!valid) {
+    return res.status(401).json({
+      message: "Invalid signature"
+    })
+  }
+
 
   const order = req.body
 
