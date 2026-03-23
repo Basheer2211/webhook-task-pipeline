@@ -19,10 +19,61 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
-  worker:
+  worker-order:
     build: .
-    container_name: webhook-worker
-    command: npm run worker
+    container_name: webhook-worker-order
+    command: npm run worker:order
+    environment:
+      - DATABASE_URL=postgresql://postgres:123@postgres:5432/restaurant_event
+      - JWT_SECRET=my_super_secret_key
+      - WEBHOOK_SECRET=my_super_secret
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  worker-accounting:
+    build: .
+    container_name: webhook-worker-accounting
+    command: npm run worker:accounting
+    environment:
+      - DATABASE_URL=postgresql://postgres:123@postgres:5432/restaurant_event
+      - JWT_SECRET=my_super_secret_key
+      - WEBHOOK_SECRET=my_super_secret
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  worker-kitchen:
+    build: .
+    container_name: webhook-worker-kitchen
+    command: npm run worker:kitchen
+    environment:
+      - DATABASE_URL=postgresql://postgres:123@postgres:5432/restaurant_event
+      - JWT_SECRET=my_super_secret_key
+      - WEBHOOK_SECRET=my_super_secret
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  worker-delivery:
+    build: .
+    container_name: webhook-worker-delivery
+    command: npm run worker:delivery
     environment:
       - DATABASE_URL=postgresql://postgres:123@postgres:5432/restaurant_event
       - JWT_SECRET=my_super_secret_key

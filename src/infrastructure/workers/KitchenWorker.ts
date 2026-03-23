@@ -1,5 +1,10 @@
 import { Worker } from "bullmq"
+import { processingOrder } from "../../application/use-cases/processingOrder"
+import { PrismaOrderRepository } from "../database/PrismaOrderRepository"
+import {OrderStatus} from "../../domain/enums/OrderStatus"
 
+const repository = new PrismaOrderRepository()
+const storage = new processingOrder(repository)
 new Worker(
   "kitchenQueue",
   async (job) => {
@@ -11,11 +16,12 @@ new Worker(
     }
 
     console.log("Cooking started")
+    await repository.updateStatus(job.data.id, OrderStatus.KITCHEN)
 
   },
   {
     connection: {
-      host: "redis",
+      host: process.env.REDIS_HOST || "redis",
       port: 6379
     }
   }

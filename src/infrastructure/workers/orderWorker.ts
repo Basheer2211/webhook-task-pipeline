@@ -1,6 +1,7 @@
 import { Worker } from "bullmq"
 import { processingOrder } from "../../application/use-cases/processingOrder"
 import { PrismaOrderRepository } from "../database/PrismaOrderRepository"
+import {OrderStatus} from "../../domain/enums/OrderStatus"
 import { accountingQueue } from "../queue/accountingQueue"
 import { kitchenQueue } from "../queue/kitchenQueue"
 import { deliveryQueue } from "../queue/deliveryQueue"
@@ -20,21 +21,23 @@ new Worker(
       attempts :3,
       backoff:{type:"exponential" , delay:5000}
     })
+
+
     await kitchenQueue.add("send-to-kitchen", order,{
       attempts :3,
       backoff:{type:"exponential" , delay:5000}
     })
+    
     await deliveryQueue.add("send-to-delivery", order,{
       attempts :3,
       backoff:{type:"exponential" , delay:5000}
     })
-
     console.log("Order sent to all systems")
 
   },
   {
     connection: {
-      host: "redis",
+      host: process.env.REDIS_HOST || "redis",
       port: 6379
     },
     concurrency: 5

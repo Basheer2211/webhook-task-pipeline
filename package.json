@@ -8,6 +8,10 @@
     "worker": "node dist/infrastructure/workers/orderWorker.js",
     "test": "echo \"No tests yet\"",
     "build": "tsc",
+    "worker:order": "ts-node src/infrastructure/workers/orderWorker.ts",
+  "worker:accounting": "ts-node src/infrastructure/workers/AccountingWorker.ts",
+  "worker:kitchen": "ts-node src/infrastructure/workers/KitchenWorker.ts",
+  "worker:delivery": "ts-node src/infrastructure/workers/DeliveryWorker.ts",
     "dev": "ts-node-dev src/server.ts"
   },
   "keywords": [],

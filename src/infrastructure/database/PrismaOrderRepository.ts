@@ -1,26 +1,30 @@
 import { Order } from "../../domain/entities/Order"
 import { OrderRepository } from "../../domain/repositories/OrderRepository"
 import { prisma } from "./prisma"
+import { OrderStatus } from "../../domain/enums/OrderStatus"
 
 export class PrismaOrderRepository implements OrderRepository {
+  private mapToOrder(order: any): Order {
+  return {
+    id: order.id,
+    total: order.total,
+    status: order.status,
+    address: order.address,
+    createdAt: order.createdAt
+  }
+}
 
   async create(order: Order): Promise<Order> {
 
     const newOrder = await prisma.orders.create({
       data: {
         total: order.total,
-        status: order.status,
+        status:  OrderStatus.PENDING ,
         address: order.address
       }
     })
 
-    return {
-      id: newOrder.id,
-      total: newOrder.total,
-      status: newOrder.status,
-      address: newOrder.address,
-      createdAt: newOrder.createdAt
-    }
+   return this.mapToOrder(newOrder)
   }
 
   async update(order: Order): Promise<Order> {
@@ -28,16 +32,15 @@ export class PrismaOrderRepository implements OrderRepository {
       if (!order.id) {
        throw new Error("Order id is required for update")
         }
-    const updatedOrder = await prisma.orders.update({
-      where: { id: order.id },
-      data: {
-        total: order.total,
-        status: order.status,
-        address: order.address
-      }
-    })
+     const updatedOrder = await prisma.orders.update({
+    where: { id: order.id },
+    data: {
+      ...(order.total !== undefined && { total: order.total }),
+      ...(order.address && { address: order.address })
+    }
+  })
 
-    return updatedOrder
+  return this.mapToOrder(updatedOrder)
   }
 
   async getById(id: number): Promise<Order | null> {
@@ -46,7 +49,7 @@ export class PrismaOrderRepository implements OrderRepository {
       where: { id }
     })
 
-    return order
+    return this.mapToOrder(order)
   }
 
   async delete(id: number): Promise<Order> {
@@ -55,14 +58,22 @@ export class PrismaOrderRepository implements OrderRepository {
       where: { id }
     })
 
-    return deletedOrder
+    return this.mapToOrder(deletedOrder)
   }
 
-  async getAll(): Promise<Order[]> {
+async getAll(): Promise<Order[]> {
+  const orders = await prisma.orders.findMany()
 
-    const orders = await prisma.orders.findMany()
+  return orders.map(order => this.mapToOrder(order))
+}
+  async updateStatus(id:number, status:OrderStatus){
+      const updatedOrder = await prisma.orders.update({
+    where: { id },
+    data: {
+      status
+    }
+  })
 
-    return orders
+  return this.mapToOrder(updatedOrder)
   }
-
 }

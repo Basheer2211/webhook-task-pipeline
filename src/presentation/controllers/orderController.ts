@@ -64,50 +64,29 @@ router.get("/webhook/order/getAllOrders",authMiddleware,adminMiddleware, async (
   })
 
 })
-router.put("/webhook/order/update/:id",authMiddleware, async (req, res) => {
-
+router.put("/webhook/order/update/:id", authMiddleware, async (req, res) => {
   const id = Number(req.params.id)
 
-  const existingOrder = await orderService.getById(id)
+  const updatedData = { ...req.body, id }
 
-  if (!existingOrder) {
-    return res.status(404).json({
-      message: "Order not found"
-    })
+  const result = await orderService.update(updatedData)
+
+  if (!result.success) {
+    return res.status(400).json({ message: result.message })
   }
 
-  const updatedData = {
-    ...existingOrder,
-    ...req.body,
-    id
-  }
-
-  const order = await orderService.update(updatedData)
-
-  res.json({
-    message: "Order updated",
-    data: order
-  })
-
+  res.json({ message: result.message, data: result.order })
 })
-router.delete("/webhook/order/delete/:id", authMiddleware,adminMiddleware, async (req, res) => {
-
+router.delete("/webhook/order/delete/:id", authMiddleware, adminMiddleware, async (req, res) => {
   const id = Number(req.params.id)
 
-  const existingOrder = await orderService.getById(id)
+  const result = await orderService.delete(id)
 
-  if (!existingOrder) {
-    return res.status(404).json({
-      message: "Order not found"
-    })
+  if (!result.success) {
+    return res.status(400).json({ message: result.message })
   }
 
-  await orderService.delete(id)
-
-  res.json({
-    message: "Order deleted successfully"
-  })
-
+  res.json({ message: result.message, order: result.order })
 })
 
 export default router
