@@ -33,6 +33,9 @@ export class processingOrder {
     async getById(id: number): Promise<Order | null> {
   
       const order = await this.OrderRepository.getById(id);
+      if(!order){
+        throw new Error("Order not found");
+      }
   
       return order
     }

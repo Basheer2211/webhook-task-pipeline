@@ -44,17 +44,25 @@ router.post("/webhook/order", async (req, res) => {
 
 })
 
-router.get("/webhook/order/get/:id",authMiddleware, async (req, res) => {
+router.get("/webhook/order/get/:id", authMiddleware, async (req, res) => {
+  try {
+    const id = Number(req.params.id);
 
-  const id = Number(req.params.id)
-  const order=await orderService.getById(id);
+    const order = await orderService.getById(id);
 
-  res.json({
-    message: "Order id received",
-    data:order
-  })
+    res.status(200).json({
+      message: "Order retrieved successfully",
+      data: order
+    });
 
-})
+  } catch (e) {
+    res.status(404).json({
+      message:  "Order not found"
+    });
+  }
+});
+
+
 router.get("/webhook/order/getAllOrders",authMiddleware,adminMiddleware, async (req, res) => {
   const order=await orderService.getAll();
 

@@ -1,7 +1,6 @@
 import { Worker } from "bullmq"
 import { processingOrder } from "../../application/use-cases/processingOrder"
 import { PrismaOrderRepository } from "../database/PrismaOrderRepository"
-import {OrderStatus} from "../../domain/enums/OrderStatus"
 import { accountingQueue } from "../queue/accountingQueue"
 import { kitchenQueue } from "../queue/kitchenQueue"
 import { deliveryQueue } from "../queue/deliveryQueue"
